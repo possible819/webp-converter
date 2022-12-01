@@ -6,7 +6,7 @@
   "author": "Jay Lee <jaylee.possible@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "serve": "node dist/app.js",
+    "start": "node dist/app.js",
     "build": "tsc",
     "serve:dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/app.ts",
     "lint": "eslint",
