@@ -3,10 +3,9 @@ import express from 'express'
 import fs from 'fs'
 import multer from 'multer'
 import sharp from 'sharp'
-import Config from './util/config'
 
 const app = express()
-const port = Number(new Config<{ PORT: string }>().get('PORT'))
+const APP_PORT = process.env.PORT || 8080
 
 app.use(express.static('public'))
 app.use(bodyParser.json())
@@ -38,6 +37,6 @@ app.get('/download/:filename', (req, res) => {
   res.download(`./public/output/${filename}`)
 })
 
-app.listen(port, () => {
-  console.log(`Application is running on ${port}`)
+app.listen(APP_PORT, () => {
+  console.log(`Application is running on ${APP_PORT}`)
 })
