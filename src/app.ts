@@ -82,9 +82,10 @@ app.get('/app.js', (_req, res) => {
 })
 
 const MAX_FILES = 20
+const MAX_FILE_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || '50', 10)
 const converter = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: MAX_FILE_SIZE_MB * 1024 * 1024 },
 }).array('file', MAX_FILES)
 
 app.post('/convert', converter, async (req, res) => {
@@ -147,6 +148,28 @@ app.get('/api/history', (_req, res) => {
   }))
   res.json(list)
 })
+
+app.use(
+  (
+    err: unknown,
+    _req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    if (
+      err &&
+      typeof err === 'object' &&
+      'code' in err &&
+      (err as { code: string }).code === 'LIMIT_FILE_SIZE'
+    ) {
+      res
+        .status(413)
+        .json({ error: 'File too large', maxFileSizeMB: MAX_FILE_SIZE_MB })
+      return
+    }
+    next(err)
+  },
+)
 
 app.listen(APP_PORT, () => {
   console.log(`Application is running on ${APP_PORT}`)
