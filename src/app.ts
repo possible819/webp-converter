@@ -64,6 +64,7 @@ app.get('/', (_req, res) => {
   res.type('html').send(renderHtml())
 })
 
+// Serve client script from public/app.js (no static mount)
 const appJsPath = path.join(process.cwd(), 'public', 'app.js')
 app.get('/app.js', (_req, res) => {
   if (!fs.existsSync(appJsPath)) {
