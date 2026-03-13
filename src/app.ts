@@ -63,10 +63,39 @@ app.post('/convert', converter, async (req, res) => {
   res.json({ files: result })
 })
 
-app.get('/download/:filename', (req, res) => {
-  if (!req.params.filename) throw new Error('No specified file name found.')
-  const filename = req.params.filename
-  res.download(path.join(PUBLIC_OUTPUT, filename))
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+app.get('/download/:id', (req, res) => {
+  const id = req.params.id
+  if (!id || !UUID_REGEX.test(id)) {
+    res.status(400).json({ error: 'Invalid or missing id' })
+    return
+  }
+  const history: Record<string, { originalName: string; createdAt: string }> =
+    JSON.parse(fs.readFileSync(HISTORY_PATH, 'utf8'))
+  const meta = history[id]
+  if (!meta) {
+    res.status(404).json({ error: 'File not found' })
+    return
+  }
+  const filePath = path.join(OUTPUT_DIR, `${id}.webp`)
+  if (!fs.existsSync(filePath)) {
+    res.status(404).json({ error: 'File not found' })
+    return
+  }
+  res.download(filePath, meta.originalName)
+})
+
+app.get('/api/history', (_req, res) => {
+  const history: Record<string, { originalName: string; createdAt: string }> =
+    JSON.parse(fs.readFileSync(HISTORY_PATH, 'utf8'))
+  const list = Object.entries(history).map(([id, meta]) => ({
+    id,
+    originalName: meta.originalName,
+    createdAt: meta.createdAt,
+  }))
+  res.json(list)
 })
 
 app.listen(APP_PORT, () => {
