@@ -49,6 +49,11 @@ class WebpConverter {
 
   setLoading(show) {
     if (this.loading) this.loading.style.display = show ? 'block' : 'none'
+    if (this.dropZone) {
+      this.dropZone.disabled = show
+      this.dropZone.style.pointerEvents = show ? 'none' : ''
+      this.dropZone.style.opacity = show ? '0.6' : '1'
+    }
   }
 
   renderConvertResult(files) {
