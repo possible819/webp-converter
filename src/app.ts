@@ -23,13 +23,55 @@ if (!fs.existsSync(HISTORY_PATH)) {
   fs.writeFileSync(HISTORY_PATH, '{}', 'utf8')
 }
 
-const PUBLIC_OUTPUT = path.join('public', 'output')
-if (!fs.existsSync(PUBLIC_OUTPUT)) {
-  fs.mkdirSync(PUBLIC_OUTPUT, { recursive: true })
+app.use(bodyParser.json())
+
+function renderHtml(): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Convert image files to WebP for free" />
+    <title>WebP Converter</title>
+    <style>
+      html, body { display: flex; width: 100vw; height: 100vh; margin: 0; font-family: sans-serif; color: #666; }
+      main { display: flex; flex-direction: column; margin: 30px auto auto; }
+      #drop-zone { display: grid; width: 300px; height: 300px; background: #eee; border-radius: 8px; font-size: 20px; font-weight: 600; place-items: center; text-align: center; margin: auto; line-height: 40px; cursor: pointer; }
+      #drop-zone:hover { opacity: 0.5; }
+      #hidden-form { display: none; }
+      #convert-result, #history-list { margin-top: 20px; }
+      #loading { display: none; margin-top: 10px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <button type="button" id="drop-zone">
+        <h1>WebP Converter</h1>
+        <p>Drop files or click to convert</p>
+      </button>
+      <form id="hidden-form"><input id="file-input" name="file" type="file" accept="image/*" multiple /></form>
+      <div id="loading">Converting...</div>
+      <div id="convert-result"></div>
+      <div id="history-list"></div>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>`
 }
 
-app.use(express.static('public'))
-app.use(bodyParser.json())
+app.get('/', (_req, res) => {
+  res.type('html').send(renderHtml())
+})
+
+const appJsPath = path.join(process.cwd(), 'public', 'app.js')
+app.get('/app.js', (_req, res) => {
+  if (!fs.existsSync(appJsPath)) {
+    res.status(404).send('Not found')
+    return
+  }
+  res.type('application/javascript').send(fs.readFileSync(appJsPath, 'utf8'))
+})
 
 const MAX_FILES = 20
 const converter = multer({
