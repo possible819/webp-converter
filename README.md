@@ -1,45 +1,89 @@
 # WebP Converter
 
-Convert images to WebP via a simple web UI or API. Supports multiple files, persistent history, and download by ID.
+이미지를 WebP로 변환하는 웹 앱입니다. 브라우저에서 드래그 앤 드롭으로 여러 파일을 올리면 변환되고, 변환 목록과 히스토리에서 다운로드할 수 있습니다.
 
-## Features
+## 기능
 
-- **Multi-file convert**: Upload multiple images; each is stored with a UUID and listed in history.
-- **History**: Converted files persist across restarts (stored in `data/`). Use the UI or `GET /api/history` to list them.
-- **Download by ID**: Download via `GET /download/:id`; the server sends the file with the original name.
+- **복수 파일 변환**: 여러 이미지를 한 번에 업로드 (최대 20개, 파일당 10MB)
+- **히스토리**: 변환된 파일은 서버 재시작 후에도 유지되며, 목록에서 다시 다운로드 가능
+- **다운로드**: UUID 기준 다운로드, 저장 시 원본 파일명으로 저장
 
-## Tech
+## 기술 스택
 
-- Node.js, TypeScript, Express
-- [Sharp](https://sharp.pixelplumbing.com/) for WebP conversion
-- Multer (memory storage) for uploads
+- **Runtime**: Node.js
+- **Language**: TypeScript
+- **Framework**: Express
+- **이미지 변환**: [Sharp](https://sharp.pixelplumbing.com/)
+- **업로드**: Multer (메모리 스토리지)
 
 ## API
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/convert` | Upload one or more images (multipart, field `file`). Returns `{ files: [ { id, originalName }, ... ] }`. |
-| `GET` | `/download/:id` | Download converted file by UUID; original filename in `Content-Disposition`. |
-| `GET` | `/api/history` | List all converted files: `[ { id, originalName, createdAt }, ... ]`. |
-| `GET` | `/` | Serves the web UI (dynamic HTML). |
-| `GET` | `/app.js` | Client script for the UI. |
+| Method | Endpoint | 설명 |
+|--------|----------|------|
+| `GET` | `/` | 웹 UI (동적 HTML) |
+| `GET` | `/app.js` | 클라이언트 스크립트 |
+| `POST` | `/convert` | 이미지 업로드 후 WebP 변환 (multipart, 필드 `file`, 복수 가능) |
+| `GET` | `/download/:id` | 변환 파일 다운로드 (UUID, 원본 파일명으로 저장) |
+| `GET` | `/api/history` | 변환 히스토리 목록 JSON |
 
-## Data
+### POST /convert
 
-- Converted files: `data/output/<uuid>.webp` (path overridable with `DATA_DIR`).
-- Metadata: `data/history.json` (id → originalName, createdAt). Ignored by git via `.gitignore` (`data/`).
+- **요청**: `multipart/form-data`, 필드명 `file`, 여러 파일 시 동일 필드로 반복
+- **응답**: `{ "files": [ { "id": "uuid", "originalName": "이름.webp" }, ... ] }`
 
-## Setup and run
+### GET /api/history
+
+- **응답**: `[ { "id": "uuid", "originalName": "이름.webp", "createdAt": "ISO8601" }, ... ]`
+
+## 데이터 저장
+
+- **변환 파일**: `data/output/<uuid>.webp`
+- **메타데이터**: `data/history.json` (id → originalName, createdAt)
+- **경로 변경**: 환경 변수 `DATA_DIR` (기본값 `data`)
+- `data/` 디렉터리는 `.gitignore`에 포함되어 커밋되지 않습니다.
+
+## 사전 요구 사항
+
+- Node.js 18+
+- Yarn 1.x
+
+## 설치 및 실행
 
 ```bash
 yarn install
 yarn build
-yarn start   # default port 8080; set PORT or use serve:dev
+yarn start
 ```
 
-- **Dev**: `yarn serve:dev` (nodemon, ts-node, PORT=8080).
-- **Production**: `yarn pm2:start` (see `ecosystem.config.cjs`; port 10001).
+- **기본 포트**: 8080 (환경 변수 `PORT`로 변경 가능)
+- **개발**: `yarn serve:dev` — nodemon + ts-node, 포트 8080
+- **PM2**: `yarn pm2:start` — `ecosystem.config.cjs` 기준 (포트 10001)
 
-## License
+## 스크립트
+
+| 스크립트 | 설명 |
+|----------|------|
+| `yarn start` | 빌드된 앱 실행 |
+| `yarn build` | TypeScript 컴파일 |
+| `yarn serve:dev` | 개발 서버 (핫 리로드) |
+| `yarn pm2:start` / `pm2:stop` / `pm2:restart` / `pm2:logs` / `pm2:status` | PM2 관리 |
+| `yarn lint` | ESLint |
+| `yarn format` | Prettier |
+
+## 프로젝트 구조
+
+```
+├── src/
+│   └── app.ts       # 서버 진입점, 라우트, 동적 HTML
+├── public/
+│   └── app.js       # 웹 UI 클라이언트 스크립트
+├── data/             # 런타임 생성 (output, history.json)
+├── dist/             # 빌드 결과
+├── package.json
+├── tsconfig.json
+└── ecosystem.config.cjs
+```
+
+## 라이선스
 
 MIT
