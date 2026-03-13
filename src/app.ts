@@ -25,6 +25,20 @@ if (!fs.existsSync(HISTORY_PATH)) {
 
 app.use(bodyParser.json())
 
+function logLine(msg: string): void {
+  const ts = new Date().toISOString()
+  console.log(`[${ts}] ${msg}`)
+}
+
+app.use((req, res, next) => {
+  const start = Date.now()
+  res.on('finish', () => {
+    const ms = Date.now() - start
+    logLine(`${req.method} ${req.originalUrl} ${res.statusCode} ${ms}ms`)
+  })
+  next()
+})
+
 function renderHtml(): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -162,6 +176,7 @@ app.use(
       'code' in err &&
       (err as { code: string }).code === 'LIMIT_FILE_SIZE'
     ) {
+      logLine(`ERROR File too large (max ${MAX_FILE_SIZE_MB}MB)`)
       res
         .status(413)
         .json({ error: 'File too large', maxFileSizeMB: MAX_FILE_SIZE_MB })
@@ -171,6 +186,18 @@ app.use(
   },
 )
 
+app.use(
+  (
+    err: unknown,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
+    logLine(`ERROR ${err instanceof Error ? err.message : String(err)}`)
+    res.status(500).json({ error: 'Internal server error' })
+  },
+)
+
 app.listen(APP_PORT, () => {
-  console.log(`Application is running on ${APP_PORT}`)
+  logLine(`Application is running on ${APP_PORT}`)
 })
