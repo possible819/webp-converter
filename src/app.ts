@@ -35,13 +35,20 @@ function renderHtml(): string {
     <meta name="description" content="Convert image files to WebP for free" />
     <title>WebP Converter</title>
     <style>
-      html, body { display: flex; width: 100vw; height: 100vh; margin: 0; font-family: sans-serif; color: #666; }
-      main { display: flex; flex-direction: column; margin: 30px auto auto; }
-      #drop-zone { display: grid; width: 300px; height: 300px; background: #eee; border-radius: 8px; font-size: 20px; font-weight: 600; place-items: center; text-align: center; margin: auto; line-height: 40px; cursor: pointer; }
-      #drop-zone:hover { opacity: 0.5; }
+      html, body { display: flex; width: 100vw; height: 100vh; margin: 0; font-family: sans-serif; color: #333; }
+      main { display: flex; flex-direction: column; margin: 30px auto; max-width: 480px; padding: 0 16px; }
+      #drop-zone { display: grid; width: 100%; min-height: 180px; background: #f5f5f5; border: 2px dashed #ccc; border-radius: 12px; font-size: 18px; font-weight: 600; place-items: center; text-align: center; line-height: 1.4; cursor: pointer; transition: border-color .2s, background .2s; }
+      #drop-zone:hover { border-color: #999; background: #eee; }
+      #drop-zone:disabled { cursor: not-allowed; }
       #hidden-form { display: none; }
-      #convert-result, #history-list { margin-top: 20px; }
-      #loading { display: none; margin-top: 10px; }
+      #loading { display: none; margin-top: 12px; color: #666; font-size: 14px; }
+      #convert-result, #history-list { margin-top: 24px; padding: 16px; background: #fafafa; border-radius: 8px; border: 1px solid #eee; }
+      #convert-result h3, #history-list h3 { margin: 0 0 12px 0; font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: .05em; }
+      #convert-result ul, #history-list ul { list-style: none; margin: 0; padding: 0; }
+      #convert-result li, #history-list li { padding: 6px 0; border-bottom: 1px solid #eee; }
+      #convert-result li:last-child, #history-list li:last-child { border-bottom: none; }
+      #convert-result a, #history-list a { color: #1976d2; text-decoration: none; }
+      #convert-result a:hover, #history-list a:hover { text-decoration: underline; }
     </style>
   </head>
   <body>
