@@ -95,7 +95,9 @@ class WebpConverter {
                 (f) =>
                   `<li><a href="/download/${f.id}" download>${escapeHtml(
                     f.originalName,
-                  )}</a></li>`,
+                  )}</a> <span class="history-date">${formatDate(
+                    f.createdAt,
+                  )}</span></li>`,
               )
               .join('') +
             '</ul>'
@@ -111,6 +113,19 @@ function escapeHtml(text) {
   const div = document.createElement('div')
   div.textContent = text
   return div.innerHTML
+}
+
+function formatDate(isoString) {
+  if (!isoString) return ''
+  try {
+    const d = new Date(isoString)
+    return d.toLocaleString(undefined, {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    })
+  } catch (_) {
+    return isoString
+  }
 }
 
 new WebpConverter()

@@ -151,6 +151,7 @@ function renderHtml(): string {
         font-size: 0.9375rem;
       }
       #convert-result a:hover, #history-list a:hover { text-decoration: underline; }
+      #history-list .history-date { font-size: 0.8125rem; color: #64748b; margin-left: 0.35rem; }
     </style>
   </head>
   <body>
