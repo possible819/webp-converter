@@ -30,7 +30,10 @@ class WebpConverter {
       for (let i = 0; i < files.length; i++) formData.append('file', files[i])
 
       this.setLoading(true)
-      const response = await fetch('/convert', { method: 'post', body: formData })
+      const response = await fetch('/convert', {
+        method: 'post',
+        body: formData,
+      })
       this.setLoading(false)
 
       if (!response.ok) {
@@ -58,7 +61,8 @@ class WebpConverter {
 
   renderConvertResult(files) {
     if (!this.convertResult || !files?.length) return
-    this.convertResult.innerHTML = '<h3>Converted</h3>' + this.renderFileList(files)
+    this.convertResult.innerHTML =
+      '<h3>Converted</h3>' + this.renderFileList(files)
   }
 
   renderFileList(files) {
@@ -67,7 +71,9 @@ class WebpConverter {
       files
         .map(
           (f) =>
-            `<li><a href="/download/${f.id}" download>${escapeHtml(f.originalName)}</a></li>`
+            `<li><a href="/download/${f.id}" download>${escapeHtml(
+              f.originalName,
+            )}</a></li>`,
         )
         .join('') +
       '</ul>'
@@ -87,13 +93,16 @@ class WebpConverter {
             list
               .map(
                 (f) =>
-                  `<li><a href="/download/${f.id}" download>${escapeHtml(f.originalName)}</a></li>`
+                  `<li><a href="/download/${f.id}" download>${escapeHtml(
+                    f.originalName,
+                  )}</a></li>`,
               )
               .join('') +
             '</ul>'
           : '<p>No files yet.</p>')
     } catch (_) {
-      if (this.historyList) this.historyList.innerHTML = '<p>Failed to load history.</p>'
+      if (this.historyList)
+        this.historyList.innerHTML = '<p>Failed to load history.</p>'
     }
   }
 }
